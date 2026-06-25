@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>詳細記録の編集｜症状選択UIモック</title>
+  <style>
+    :root {
+      --bg: #f3fbf8;
+      --card: #ffffff;
+      --text: #203a38;
+      --muted: #70827f;
+      --line: #dfeeea;
+      --line2: #cfe4df;
+      --main: #168f7b;
+      --main2: #0f7566;
+      --soft: #e9f7f3;
+      --soft2: #d9f4ee;
+      --danger: #dc4c5a;
+      --g0: #e7f7f2;
+      --g1: #fff8c8;
+      --g2: #ffe6c8;
+      --g3: #ffd9df;
+      --g1b: #d7bf31;
+      --g2b: #e58a2c;
+      --g3b: #d44b58;
+      --shadow: 0 10px 26px rgba(23, 78, 69, .08);
+      --radius: 22px;
+      --navH: 78px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      color: var(--text);
+      background: linear-gradient(90deg, #edf8f5 0, #f9fffd 8%, #f9fffd 92%, #edf8f5 100%);
+      font-weight: 700;
+    }
+
+    .app {
+      max-width: 430px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: #fbfffd;
+      border-left: 1px solid #e7f2ef;
+      border-right: 1px solid #e7f2ef;
+      padding-bottom: calc(var(--navH) + 18px);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(251, 255, 253, .94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 18px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: .02em;
+      line-height: 1.15;
+    }
+
+    .header-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .patient {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 12px 12px;
+      font-size: 14px;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(23, 78, 69, .04);
+    }
+
+    main {
+      padding: 16px 14px 24px;
+    }
+
+    .section {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    label.block {
+      display: block;
+      font-size: 16px;
+      margin: 0 0 9px;
+    }
+
+    .required { color: var(--danger); }
+
+    .input, .select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--line2);
+      border-radius: 18px;
+      padding: 15px 16px;
+      background: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 115px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    .required-note {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 6px 0 22px;
+      font-weight: 900;
+    }
+
+    .top-fields {
+      display: grid;
+      gap: 18px;
+    }
+
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #f2faf7;
+      border: 1.5px solid var(--line);
+      border-radius: 20px;
+      padding: 5px;
+      gap: 5px;
+    }
+
+    .seg-btn {
+      border: 0;
+      background: transparent;
+      border-radius: 16px;
+      padding: 14px 8px;
+      font-size: 18px;
+      color: #687977;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .seg-btn.active {
+      background: var(--soft2);
+      color: var(--main2);
+      outline: 1.5px solid #73d4c4;
+    }
+
+    .grade-guide {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: #edf6f3;
+      color: var(--text);
+      border: 0;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 900;
+      text-decoration: underline;
+      margin: 14px 0 16px;
+      cursor: pointer;
+    }
+
+    .symptom-area {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .symptom-area.show { display: block; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0 0 12px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      margin: 10px 0;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 14px 14px;
+      font-size: 17px;
+      font-weight: 900;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fbfffd;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "▼";
+      color: var(--main2);
+      font-size: 12px;
+      transition: transform .15s;
+    }
+
+    details[open] summary::after { transform: rotate(180deg); }
+
+    .symptom-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+
+    .symptom {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      border: 1.5px solid var(--line);
+      border-radius: 15px;
+      padding: 11px 10px;
+      cursor: pointer;
+      background: #fff;
+      transition: .12s ease;
+    }
+
+    .symptom input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--main);
+    }
+
+    .symptom .text {
+      min-width: 0;
+    }
+
+    .symptom .title {
+      font-size: 14.5px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .symptom .note {
+      color: var(--muted);
+      font-size: 11.5px;
+      margin-top: 3px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .symptom.selected {
+      border-color: #78d0c1;
+      background: #edf9f6;
+    }
+    .symptom.g1.selected { background: var(--g1); border-color: #ddc848; }
+    .symptom.g2.selected { background: var(--g2); border-color: #efa55a; }
+    .symptom.g3.selected { background: var(--g3); border-color: #e1737e; }
+
+    .chip {
+      font-size: 11px;
+      font-weight: 900;
+      border-radius: 999px;
+      padding: 5px 7px;
+      white-space: nowrap;
+      background: var(--g0);
+      color: var(--main2);
+    }
+
+    .chip.g1 { background: var(--g1); color: #775f00; }
+    .chip.g2 { background: var(--g2); color: #a54f00; }
+    .chip.g3 { background: var(--g3); color: #a91925; }
+
+    .result-card {
+      border-radius: 19px;
+      padding: 15px;
+      margin: 14px 0;
+      border: 2px solid var(--line2);
+      background: #f8fffc;
+    }
+
+    .result-card.g0 { background: #f2fbf8; border-color: #bde7df; }
+    .result-card.g1 { background: #fffbd6; border-color: #e7d465; }
+    .result-card.g2 { background: #fff0dc; border-color: #eba04e; }
+    .result-card.g3 { background: #ffe1e6; border-color: #dd626d; }
+
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .result-grade {
+      font-size: 24px;
+      font-weight: 1000;
+      margin-top: 3px;
+    }
+
+    .reason {
+      display: grid;
+      gap: 7px;
+      margin-top: 11px;
+    }
+
+    .reason-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 12px;
+      background: rgba(255,255,255,.7);
+      font-size: 12px;
+    }
+
+    .notice {
+      color: #4b625f;
+      background: #f1f8f6;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px;
+      font-size: 12px;
+      line-height: 1.55;
+      margin-top: 11px;
+    }
+
+    .notice.danger {
+      background: #fff1f3;
+      color: #8b1d28;
+      border-color: #ffc7ce;
+    }
+
+    .med-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .med-cat {
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .med-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .med {
+      border: 0;
+      background: #edf7f4;
+      color: var(--main2);
+      border-radius: 999px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      min-width: 112px;
+      text-align: center;
+    }
+
+    .med.active {
+      background: #d8f3ed;
+      outline: 2px solid #72ccbe;
+    }
+
+    .save {
+      width: 100%;
+      border: 0;
+      background: var(--main);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 143, 123, .22);
+      margin-top: 8px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(430px, 100%);
+      height: var(--navH);
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 50;
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 3px;
+      color: #66706f;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .nav-item .icon { font-size: 21px; }
+    .nav-item.active {
+      background: #dff7f0;
+      color: var(--main2);
+      border-radius: 20px;
+      margin: 10px 6px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 36, 34, .32);
+      display: none;
+      place-items: center;
+      z-index: 100;
+      padding: 18px;
+    }
+
+    .modal.show { display: grid; }
+
+    .modal-card {
+      width: min(390px, 100%);
+      background: #fff;
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+    }
+
+    .modal-card h2 { margin: 0 0 10px; }
+    .grade-table {
+      display: grid;
+      gap: 7px;
+      font-size: 13px;
+    }
+    .grade-table div {
+      padding: 10px;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+
+    .close {
+      margin-top: 12px;
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--main);
+      color: #fff;
+      font-weight: 900;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-title">
+        <h1>詳細記録の編集</h1>
+        <p>食物アレルギー記録 / 患者ID：NUTS-0001</p>
+      </div>
+      <div class="patient">患者ID：NUTS-0001 ▼</div>
+    </header>
+
+    <main>
+      <section class="section">
+        <p class="required-note"><span class="required">*</span> は必須項目です。</p>
+
+        <div class="top-fields">
+          <div class="field">
+            <label class="block">食べた日付 <span class="required">*</span></label>
+            <input class="input" type="text" value="2026/06/25" inputmode="numeric" />
+          </div>
+
+          <div class="field">
+            <label class="block">食べた時間 <span class="required">*</span></label>
+            <input class="input" type="time" value="08:21" />
+          </div>
+
+          <div class="field">
+            <label class="block">食べた食材 <span class="required">*</span></label>
+            <select class="select">
+              <option>カシューナッツ</option>
+              <option>ピーナッツ</option>
+              <option>くるみ</option>
+              <option>ヘーゼルナッツ</option>
+              <option>マカダミアナッツ</option>
+              <option>その他</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="block">食べた量 <span class="required">*</span></label>
+            <select class="select">
+              <option>0.1g</option>
+              <option>0.2g</option>
+              <option>0.5g</option>
+              <option>1g</option>
+              <option>2g</option>
+              <option>その他</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="block">症状はありましたか？ <span class="required">*</span></label>
+          <div class="segmented">
+            <button class="seg-btn" id="noBtn" type="button">なし</button>
+            <button class="seg-btn active" id="yesBtn" type="button">あり</button>
+          </div>
+        </div>
+
+        <div id="symptomArea" class="symptom-area show">
+          <button class="grade-guide" type="button" id="guideBtn">Gradeの目安を見る</button>
+          <p class="hint">該当する症状を選ぶと、最も重い症状をもとにGradeを自動判定します。</p>
+
+          <div id="categoryList"></div>
+
+          <div id="resultCard" class="result-card g0">
+            <div class="result-head">
+              <div>
+                <div class="result-label">自動判定結果</div>
+                <div id="gradeText" class="result-grade">Grade 0（症状なし）</div>
+              </div>
+              <span id="gradeChip" class="chip">G0</span>
+            </div>
+            <div id="reasonList" class="reason"></div>
+            <div id="notice" class="notice">
+              症状を選択すると、選択理由がここに表示されます。最終判断は医師が確認します。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="medicineSection">
+        <label class="block">使用した薬</label>
+        <div class="med-row">
+          <div class="med-cat">アドレナリン</div>
+          <div class="med-buttons">
+            <button class="med" type="button">エピペン</button>
+            <button class="med active" type="button">ネフィー</button>
+          </div>
+        </div>
+        <div class="med-row">
+          <div class="med-cat">呼吸器</div>
+          <div class="med-buttons">
+            <button class="med" type="button">気管支拡張薬</button>
+          </div>
+        </div>
+        <div class="med-row">
+          <div class="med-cat">アレルギー</div>
+          <div class="med-buttons">
+            <button class="med" type="button">抗ヒスタミン薬</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="detailSection">
+        <div class="field">
+          <label class="block">症状が出た時間 <span class="required">*</span></label>
+          <input class="input" type="time" value="12:30" />
+        </div>
+
+        <div class="field">
+          <label class="block">病院受診 <span class="required">*</span></label>
+          <select class="select">
+            <option>なし</option>
+            <option>あり</option>
+            <option>救急受診</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="block">詳しい経過・メモ</label>
+          <textarea placeholder="例：口の周りに赤み。30分で改善。"></textarea>
+        </div>
+
+        <button class="save">保存する</button>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item"><div class="icon">🏠</div><div>ホーム</div></div>
+    <div class="nav-item active"><div class="icon">📝</div><div>記録一覧</div></div>
+    <div class="nav-item"><div class="icon">📅</div><div>カレンダー</div></div>
+    <div class="nav-item"><div class="icon">📘</div><div>参考情報</div></div>
+  </nav>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>Gradeの目安</h2>
+      <div class="grade-table">
+        <div class="g0">Grade 0：症状なし、またはごく軽い症状</div>
+        <div class="g1">Grade 1：軽症。部分的な症状、単発の咳、嘔吐1回など</div>
+        <div class="g2">Grade 2：中等症。広範囲の皮膚症状、複数回の嘔吐、咳込みなど</div>
+        <div class="g3">Grade 3：重症。呼吸困難、ぐったり、意識低下、声が出ないなど</div>
+      </div>
+      <button class="close" id="closeBtn">閉じる</button>
+    </div>
+  </div>
+
+  <script>
+    const categories = [
+      {
+        key: "skin",
+        name: "皮膚・粘膜",
+        symptoms: [
+          { id: "skin1", label: "部分的なじんま疹・膨隆", note: "一部に出ている", grade: 1 },
+          { id: "skin2", label: "広範囲・全身のじんま疹", note: "体にも広がっている", grade: 2 },
+          { id: "skin3", label: "顔全体の腫れ", note: "口唇・目・顔が大きく腫れる", grade: 2 },
+          { id: "skin4", label: "締め付け感・声枯れ・声が出ない", note: "喉の症状。緊急性が高い", grade: 3 }
+        ]
+      },
+      {
+        key: "resp",
+        name: "呼吸器",
+        symptoms: [
+          { id: "resp1", label: "咳が少し出る", note: "単発〜短時間", grade: 1 },
+          { id: "resp2", label: "咳が続く・咳込み", note: "連続する咳", grade: 2 },
+          { id: "resp3", label: "喘鳴がある", note: "ゼーゼー・ヒューヒュー", grade: 3 },
+          { id: "resp4", label: "呼吸困難・チアノーゼ", note: "息苦しい、唇が紫など", grade: 3 }
+        ]
+      },
+      {
+        key: "gi",
+        name: "消化器",
+        symptoms: [
+          { id: "gi1", label: "吐き気", note: "気持ち悪い", grade: 0 },
+          { id: "gi2", label: "嘔吐 1回", note: "単回の嘔吐", grade: 1 },
+          { id: "gi3", label: "嘔吐 複数回", note: "2回以上", grade: 2 },
+          { id: "gi4", label: "繰り返す嘔吐", note: "何度も吐く", grade: 3 },
+          { id: "gi5", label: "強い腹痛", note: "がまんできる程度", grade: 2 },
+          { id: "gi6", label: "強烈な腹痛", note: "がまんできない", grade: 3 }
+        ]
+      },
+      {
+        key: "general",
+        name: "全身",
+        symptoms: [
+          { id: "gen1", label: "明らかに元気がない", note: "横になりたがる、立てない", grade: 2 },
+          { id: "gen2", label: "ぐったりしている", note: "反応が弱い", grade: 3 },
+          { id: "gen3", label: "意識低下・意識消失・失禁", note: "緊急性が高い", grade: 3 }
+        ]
+      }
+    ];
+
+    const selected = new Map();
+    const gradeNames = ["症状なし", "軽症", "中等症", "重症"];
+
+    function renderCategories() {
+      const container = document.getElementById("categoryList");
+      container.innerHTML = categories.map((cat, idx) => `
+        <details ${idx === 0 ? "open" : ""}>
+          <summary>${cat.name}</summary>
+          <div class="symptom-list">
+            ${cat.symptoms.map(s => `
+              <label class="symptom g${s.grade}" data-id="${s.id}">
+                <input type="checkbox" data-id="${s.id}" />
+                <div class="text">
+                  <div class="title">${s.label}</div>
+                  <div class="note">${s.note}</div>
+                </div>
+                <span class="chip g${s.grade}">G${s.grade}</span>
+              </label>
+            `).join("")}
+          </div>
+        </details>
+      `).join("");
+
+      container.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", () => {
+          const id = input.dataset.id;
+          const symptom = categories.flatMap(cat => cat.symptoms.map(s => ({...s, category: cat.name}))).find(s => s.id === id);
+          const row = input.closest(".symptom");
+          if (input.checked) {
+            selected.set(id, symptom);
+            row.classList.add("selected");
+          } else {
+            selected.delete(id);
+            row.classList.remove("selected");
+          }
+          updateResult();
+        });
+      });
+    }
+
+    function updateResult() {
+      const items = [...selected.values()].sort((a, b) => b.grade - a.grade);
+      const grade = items.length ? Math.max(...items.map(i => i.grade)) : 0;
+
+      const resultCard = document.getElementById("resultCard");
+      resultCard.className = `result-card g${grade}`;
+
+      document.getElementById("gradeText").textContent = `Grade ${grade}（${gradeNames[grade]}）`;
+      const chip = document.getElementById("gradeChip");
+      chip.textContent = `G${grade}`;
+      chip.className = `chip g${grade}`;
+
+      document.getElementById("reasonList").innerHTML = items.length
+        ? items.map(item => `
+          <div class="reason-row">
+            <span>${item.category}：${item.label}</span>
+            <span class="chip g${item.grade}">G${item.grade}</span>
+          </div>
+        `).join("")
+        : `<div class="reason-row"><span>選択された症状はありません</span><span class="chip g0">G0</span></div>`;
+
+      const notice = document.getElementById("notice");
+      if (grade >= 3) {
+        notice.className = "notice danger";
+        notice.textContent = "Grade 3相当の症状が選択されています。実運用では、救急対応や医療機関への相談を促す表示にすると分かりやすいです。";
+      } else if (grade === 2) {
+        notice.className = "notice";
+        notice.textContent = "Grade 2相当の症状が含まれます。翌日は同量摂取を避ける、外来へ相談するなどの注意文を表示できます。";
+      } else {
+        notice.className = "notice";
+        notice.textContent = "症状を選択すると、選択理由がここに表示されます。最終判断は医師が確認します。";
+      }
+    }
+
+    function setHasSymptom(value) {
+      const area = document.getElementById("symptomArea");
+      document.getElementById("yesBtn").classList.toggle("active", value);
+      document.getElementById("noBtn").classList.toggle("active", !value);
+      area.classList.toggle("show", value);
+      document.getElementById("medicineSection").style.display = value ? "block" : "none";
+      document.getElementById("detailSection").style.display = value ? "block" : "none";
+
+      if (!value) {
+        selected.clear();
+        document.querySelectorAll("input[type='checkbox']").forEach(i => i.checked = false);
+        document.querySelectorAll(".symptom").forEach(el => el.classList.remove("selected"));
+        updateResult();
+      }
+    }
+
+    document.getElementById("yesBtn").addEventListener("click", () => setHasSymptom(true));
+    document.getElementById("noBtn").addEventListener("click", () => setHasSymptom(false));
+
+    document.querySelectorAll(".med").forEach(btn => {
+      btn.addEventListener("click", () => btn.classList.toggle("active"));
+    });
+
+    document.getElementById("guideBtn").addEventListener("click", () => {
+      document.getElementById("modal").classList.add("show");
+    });
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      document.getElementById("modal").classList.remove("show");
+    });
+    document.getElementById("modal").addEventListener("click", (e) => {
+      if (e.target.id === "modal") document.getElementById("modal").classList.remove("show");
+    });
+
+    renderCategories();
+    updateResult();
+  </script>
+</body>
+</html>
